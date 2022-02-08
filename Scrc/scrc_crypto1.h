@@ -159,7 +159,7 @@ namespace scrc
 			std::uniform_int_distribution<int> range_distribution(1, 0xff);
 			uint64_t time = uint64_t(std::chrono::high_resolution_clock::now().time_since_epoch().count());
 
-			std::mt19937 random_number_engine((uint32_t)(time | (time >> 32)) ); // pseudorandom number generator
+			std::mt19937 random_number_engine((uint32_t)(time ^ (time >> 32)) ); // pseudorandom number generator
 			auto get_number = std::bind(range_distribution, random_number_engine);
 			int random_roll = get_number();
 			uint32_t size1 = (uint32_t)size, i;

@@ -64,7 +64,12 @@ int main()
 
     std::cout << "Erros during the test: " << err << "\n";
 
-
-
+    //simple test of the ramdom generator
+    int i;
+    for (i = 0; i < 0x10; ++i)
+    {
+        uint32_t rand = scrc::rand32();
+        std::cout << std::hex << "A random number is " << rand << std::endl;
+    }
     return 0;
 }

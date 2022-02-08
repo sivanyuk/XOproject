@@ -9,3 +9,4 @@
 #include "..\scrc\scrc_crypto.h"	//s& crypto 
 
 #include "xoclient1.h"
+#include "xoclient2.h"

@@ -20,6 +20,21 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XOserver", "XOserver\XOserv
 		{0CCD8192-B8C7-46E1-88C6-483B8DF40600} = {0CCD8192-B8C7-46E1-88C6-483B8DF40600}
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Qt", "Qt", "{15D4A385-94CB-4D06-B57D-14847FD19CBB}"
+	ProjectSection(SolutionItems) = preProject
+		Qt1\CMakeLists.txt = Qt1\CMakeLists.txt
+		Qt1\CMakeLists.txt.user = Qt1\CMakeLists.txt.user
+		Qt1\common_h.h = Qt1\common_h.h
+		Qt1\gboard.cpp = Qt1\gboard.cpp
+		Qt1\gboard.h = Qt1\gboard.h
+		Qt1\main.cpp = Qt1\main.cpp
+		Qt1\mainw.cpp = Qt1\mainw.cpp
+		Qt1\mainw.ui = Qt1\mainw.ui
+		Qt1\mainwi.h = Qt1\mainwi.h
+		Qt1\xoscene.cpp = Qt1\xoscene.cpp
+		Qt1\xoscene.h = Qt1\xoscene.h
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64

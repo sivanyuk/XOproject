@@ -9,14 +9,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
 #include <QDebug>
-
-
-enum class Player : uint32_t//
-{
-    None = 0,   //no player or move
-    O,
-    X,
-};
+#include "gcommon.h"
 
 
 
@@ -42,6 +35,9 @@ static const int startO =  2;
 static const int startX = 2;
 static const int endO = cells_width - 5;
 static const int endX = cells_width - 5;
+static const int start_win =  1;
+static const int end_win = cells_width - 4;
+static const int size_win_line = 3;
 
 
 
@@ -56,13 +52,14 @@ int calc_cell(int pos); //calculate cell in the scene
 void drawO(int cell_x, int cell_y);    //draw O Symbol
 void drawX(int cell_x, int cell_y);    //draw X Symbol
 void draw_player(Player player, int cell_x, int cell_y);    //draw player
+void draw_winner_line(WinInfo win_inf); //draw the line of the winner
 Qt::MouseButton mouse_but() {return mouse_but_;}
 void drawCells();   //darw celle (board)
 
 
 private:
     QPointF     previousPoint;
-    QColor colorO, colorX;
+    QColor colorO, colorX, color_win;
     int x, y;   //mouse coordinates
     int cellX, cellY;   //mouse coordinates
     Qt::MouseButton mouse_but_;
@@ -71,14 +68,13 @@ private:
 //    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     QPen penO; //(QColor::setRgb(10, 127, 10));    //color for O sign
     QPen penX; //color for X sign
+    QPen pen_win;   //winner's pen
     inline int calc_pos(int cell); //static const int cells = 21;
 
 signals:
     void sc_mouse_pressed();
     //void sc_mouse_pos();
-
-
-
 };
 
 #endif // XOSCENE_H
+

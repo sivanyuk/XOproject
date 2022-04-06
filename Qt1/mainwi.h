@@ -31,5 +31,8 @@ private slots:
     void on_startButton_pressed();  //restart the game
     void on_but_comp_pressed();     //make a computer's move
     void wite_move(Player pl);  //to write whose move is
+    void on_pushButton_pressed();
+    void on_but_calculate_pressed();
 };
 #endif // MAINW_H
+

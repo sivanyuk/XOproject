@@ -8,8 +8,11 @@ XOScene::XOScene(QObject *parent)
     colorO.setRgb(30, 150, 30, 255);
 
     colorX.setRgb(150, 40, 255, 255);
+    color_win.setRgb(255, 0, 0, 255);
+
     penO = QPen(colorO, size_Oline, Qt::SolidLine, Qt::RoundCap);    //color for O sign
     penX = QPen(colorX, size_Xline, Qt::SolidLine, Qt::RoundCap);    //color for O sign
+    pen_win = QPen(color_win, size_win_line, Qt::SolidLine, Qt::RoundCap);    //color for O sign
 
 }
 
@@ -73,6 +76,44 @@ void XOScene::draw_player(Player player, int cell_x, int cell_y)    //draw playe
     else drawX(cell_x, cell_y);
 }
 
+void XOScene::draw_winner_line(WinInfo win_inf)
+{
+//    static const int start_win =  1;
+//    static const int end_win = cells_width - 6;
+//    static const int size_win_line = 5;
+
+    int start_pixel_x   = start_win;  //calculate coordinates into pixels
+    int start_pixel_y   = start_win;
+    int end_pixel_x     = end_win;
+    int end_pixel_y     = end_win;
+    if (win_inf.x_start == win_inf.x_end)
+    {
+        start_pixel_x = end_pixel_x = (start_win + end_win) / 2;
+    }
+    else if (win_inf.x_start > win_inf.x_end)
+    {
+        start_pixel_x   = end_win;  //calculate coordinates into pixels
+        end_pixel_x     = start_win;
+
+    }
+    if (win_inf.y_start == win_inf.y_end)
+    {
+        start_pixel_y = end_pixel_y = (start_win + end_win) / 2;
+    }
+    else if(win_inf.y_start > win_inf.y_end)
+    {
+        start_pixel_y   = end_win;
+        end_pixel_y     = start_win;
+
+    }
+
+    start_pixel_x += calc_pos(win_inf.x_start);
+    start_pixel_y += calc_pos(win_inf.y_start) ;
+    end_pixel_x += calc_pos(win_inf.x_end) ;
+    end_pixel_y += calc_pos(win_inf.y_end) ;
+    addLine(start_pixel_x, start_pixel_y, end_pixel_x, end_pixel_y, pen_win);
+}
+
 void XOScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
         x = event->scenePos().rx();
@@ -101,3 +142,4 @@ int XOScene::calc_pos(int cell)
 //    y = event->scenePos().ry();
 //    emit sc_mouse_pos();
 //}
+

@@ -45,7 +45,7 @@
 	Discord:	https://discord.gg/WhwHUMV
 	Twitter:	https://www.twitter.com/javidx9
 	Twitch:		https://www.twitch.tv/javidx9
-	GitHub:		https://www.github.com/onelonecoder 
+	GitHub:		https://www.github.com/onelonecoder
 	Homepage:	https://www.onelonecoder.com
 
 	Author
@@ -129,7 +129,7 @@ namespace xop
 
 				// Recalculate the message size
 				msg.header.size = (uint32_t)msg.size();
-				//std::cout << " Output Message size size = " << msg.header.size << "\n";	//S&
+				std::cout << " Output Message size size = " << msg.header.size << "\n";	//S&
 				// Return the target message so it can be "chained"
 				return msg;
 			}
@@ -138,7 +138,7 @@ namespace xop
 			template<typename DataType>
 			friend message_& operator >> (message_& msg, DataType& data)
 			{
-				//std::cout << "Message in, header.size = " << msg.header.size << "\n";
+				std::cout << "Message in, header.size = " << msg.header.size << "\n";
 				// Check that the type of the data being pushed is trivially copyable
 				static_assert(std::is_standard_layout<DataType>::value, "Data is too complex to be pulled from vector");
 
@@ -166,13 +166,6 @@ namespace xop
 		{
 			//flag if received data is OK. Will be used in tests
 			bool fOK = false;
-
-			void clear()
-			{
-				body.resize(0);
-				header.size = 0;
-				std::cout << "Clear the message\n";	//S&
-			}
 
 			//copy data into the body from a buffer
 			void copy(uint8_t* data, size_t size)

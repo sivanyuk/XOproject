@@ -24,6 +24,7 @@ set(PROJECT_SOURCES
         gboard.h
         gboard.cpp
         mainw.ui
+        gcommon.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -62,3 +63,4 @@ set_target_properties(Project7 PROPERTIES
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(Project7)
 endif()
+

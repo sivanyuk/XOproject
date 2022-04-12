@@ -17,8 +17,8 @@
    <widget class="QGraphicsView" name="XOGrView">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>50</y>
+      <x>10</x>
+      <y>80</y>
       <width>500</width>
       <height>500</height>
      </rect>
@@ -81,7 +81,7 @@
    <widget class="QPushButton" name="startButton">
     <property name="geometry">
      <rect>
-      <x>50</x>
+      <x>30</x>
       <y>10</y>
       <width>121</width>
       <height>24</height>
@@ -141,6 +141,19 @@
     </property>
     <property name="text">
      <string>Auto mode</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="testBut">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>40</y>
+      <width>121</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start the test(s)</string>
     </property>
    </widget>
   </widget>

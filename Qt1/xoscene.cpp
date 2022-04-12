@@ -1,4 +1,10 @@
-#include "XOScene.h"
+/*
+Created by Sergey Ivanyuk 2022
+GitHub: https://github.com/sivanyuk
+*/
+
+
+#include "xoscene.h"
 
 XOScene::XOScene(QObject *parent)
     : QGraphicsScene{parent}

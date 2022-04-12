@@ -1,3 +1,7 @@
+/*
+Created by Sergey Ivanyuk 2022
+GitHub: https://github.com/sivanyuk
+*/
 #ifndef GCOMMON_H
 #define GCOMMON_H
 

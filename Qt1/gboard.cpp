@@ -1,8 +1,16 @@
+/*
+Created by Sergey Ivanyuk 2022
+GitHub: https://github.com/sivanyuk
+*/
+
 #include "common_h.h"
+#include <cstdlib>
+#include <cmath>
 
 Gboard::Gboard()
 {
     //win_.pl_win = Player::None;
+    assert(weight[(int)StatusCell::s3c].weight <= weight[(int)StatusCell::s2o].weight);     //compare weight of 3c and 2o
 }
 
 Gboard::Gboard(Player player): the_player(player)
@@ -20,7 +28,7 @@ void Gboard::init()
 
 }
 
-bool Gboard::chk_boundaries(int pos) const    //check the boundaries
+bool Gboard::chk_boundaries(int pos)    //check the boundaries
 {
     return (pos >=0) && pos < board_size;
 }
@@ -304,11 +312,12 @@ MaxWeightInfo     Gboard::find_max_weights()
     }
 
     else if ((max_Vpl >= 2 * weight[(int)StatusCell::s3c].weight) &&
-                (max_Vop >= 2 * weight[(int)StatusCell::s3c].weight))   //ckeck if both players have situation
+                (max_Vop >= 2 * weight[(int)StatusCell::s3c].weight))   //ckeck if both players have situation 2* 2o/3c situation
     {
-        if (chk_status_3c(max_wei_inf, maxV_player, adr_Vpl, true)) return max_wei_inf;
-        if (chk_status_3c(max_wei_inf, maxV_opponent, adr_Vpl, false)) return max_wei_inf;
-        gen_rnd_rez(max_wei_inf, maxV_player, adr_Vpl);
+        if (find_both_3c( max_wei_inf, startX,startY,endX, endY)) return  max_wei_inf;
+//        if (chk_status_3c(max_wei_inf, maxV_player, adr_Vpl, true)) return max_wei_inf;
+//        if (chk_status_3c(max_wei_inf, maxV_opponent, adr_Vpl, false)) return max_wei_inf;
+        gen_rnd_rez(max_wei_inf, maxV_player, adr_Vpl); //if here isn't any situation with 3c - use maximum of player
 
     }
 
@@ -351,6 +360,25 @@ void Gboard::copy_max_wei(MaxWeightInfo &maxWinfo, MaxValue &maxV, uint32_t max_
     maxWinfo.weight_sum = max_sum;
 
 }
+
+void Gboard::copy_max_wei(MaxWeightInfo &maxWinfo, int posX, int posY, Cell_info * cell_info, uint32_t max_sum)
+{
+        maxWinfo.x = posX;
+        maxWinfo.y = posY;
+        maxWinfo.weightPlayer = cell_info->pl_weight;
+        maxWinfo.weightOpponent = cell_info->op_weight;
+        maxWinfo.weight_sum = max_sum;
+}
+
+void Gboard::copy_max_wei(MaxWeightInfo &maxWinfo, Coord & coord , Cell_info & cell_info, uint32_t max_sum)
+{
+        maxWinfo.x = coord.x;
+        maxWinfo.y = coord.y;
+        maxWinfo.weightPlayer = cell_info.pl_weight;
+        maxWinfo.weightOpponent = cell_info.op_weight;
+        maxWinfo.weight_sum = max_sum;
+}
+
 
 
 int Gboard::recalc_pl_weight(int player_weight) //recalculate player weight for calculation sum of player and opponents weight
@@ -472,7 +500,7 @@ bool Gboard::chk_status_3c(MaxWeightInfo &max_wei_inf, MaxValue *maxVarr, int ar
      assert (arr_length>0);
     for (int i = 0; i < arr_length; i++)
     {
-       if (check_2o3c(maxVarr[i], fPlayer ))    //check if there is 3c situaion
+       if (check_2o3c(maxVarr[i].posX, maxVarr[i].posY, fPlayer ))    //check if there is 3c situaion
        {
                copy_max_wei(max_wei_inf, maxVarr[i],999);  //999 -flag is a fork with at least 3c cell
                return true;
@@ -481,10 +509,8 @@ bool Gboard::chk_status_3c(MaxWeightInfo &max_wei_inf, MaxValue *maxVarr, int ar
     return false;
 }
 
-bool Gboard::check_2o3c(MaxValue & maxVal, bool fPlayer, bool fChk_both)
+bool Gboard::check_2o3c(int x, int y, bool fPlayer, bool fChk_both)
 {
-    int x = maxVal.posX;
-    int y = maxVal.posY;
     StatusCell * cell_inf;   //array for cell info
     if (!fPlayer)    //If player of opponent
     {
@@ -501,6 +527,275 @@ bool Gboard::check_2o3c(MaxValue & maxVal, bool fPlayer, bool fChk_both)
 
     }
     return false;
+}
+
+bool Gboard::find_both_3c(MaxWeightInfo &max_wei_inf, int startX, int startY, int endX, int endY)
+{
+    int x, y, i;
+    Cell_info *   cell_info;   //temporary
+    StatusCell * status_arr;
+    bool fFound = false;    //if founder result for opponent
+    for (x = startX; x <= endX; ++x)
+    {
+        for (y = startY; y <= endY; ++y)
+        {
+            cell_info = &board.cell[x][y];
+            if(cell_info->pl == Player::None )  //check only emplty cell
+            {
+                if (cell_info->pl_weight >= 2 * weight[(int)StatusCell::s3c].weight)
+                {
+                    status_arr = cell_info ->pl_stat_arr;   //check the player
+                    for (i =0; i <4; ++i)
+                    {
+                        if(status_arr[i] == StatusCell::s3c)    // if player has 3c configuration - max_wei_inf and return
+                        {
+                            copy_max_wei(max_wei_inf, x, y, cell_info, (uint32_t)WeiCalcFl::f3c_player);
+                            return true;    //if the player has 3c - exit emidietelly
+                        }
+                    }
+                }
+                if (cell_info->op_weight >= 2 * weight[(int)StatusCell::s3c].weight)
+                {
+                    status_arr = cell_info ->op_stat_arr;   //check the player
+                    for (i =0; i <4; ++i)
+                    {
+                        if(status_arr[i] == StatusCell::s3c)    // if player has 3c configuration - max_wei_inf and return
+                        {
+                            copy_max_wei(max_wei_inf, x, y, cell_info, (uint32_t)WeiCalcFl::f3c_opponent);
+                            fFound = true;  //don't exit out of the function. Check further the player
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+    return fFound;  //exit with
+}
+
+bool Gboard::check_foreview(MaxWeightInfo &max_wei_inf, int startX, int startY, int endX, int endY)
+{
+    const int size_arr = 32;
+    Coord pl2o3c_arr[size_arr]; //array of 2o or 3c configuration for player
+    Coord op2o3c_arr[size_arr]; //array of 2o or 3c configuration for opponent //summary size is for player and opponent is 128 byte
+    int cou_pl = 0;
+    int cou_op = 0;
+    int x, y;
+    bool fFound;    //flag if found foreview fork
+
+    for ( x = startX; x < startX; x++)
+    {
+        for (y = startY; y < startY; y++)
+        {
+            if ((board.cell[x][y].pl_weight >= weight[(int)StatusCell::s3c].weight)  && cou_pl < size_arr)  //check weight for 3c and >
+            {
+                if (check_2o3c(x,y, true, true)) //check 2o or 3c
+                {
+                     pl2o3c_arr[cou_pl].x = x;
+                     pl2o3c_arr[cou_pl++].y = y;
+                }
+            }
+            if ((board.cell[x][y].op_weight >= weight[(int)StatusCell::s3c].weight)  && cou_op < size_arr)  //check weight for 3c and >
+            {
+                if (check_2o3c(x,y, false, true)) //check 2o or 3c  - for opponent
+                {
+                     op2o3c_arr[cou_op].x = x;
+                     op2o3c_arr[cou_op++].y = y;
+                }
+            }
+        }
+    }
+    bool f3c = false;   //flag if will found situation with 3c sttus
+    int i; int j;
+    for (i = 0; i <  cou_pl - 1; i++)
+    {
+        for (j = i; i < cou_pl ; j++)
+        {
+           Dist12 fDist = chk_dist(pl2o3c_arr[i], pl2o3c_arr[j]);   //check distance
+           if (fDist == Dist12::both_no) break;     //distances are > 2 for bothc oordinates
+           if (fDist == Dist12::yes)    //distances to cell with 2o, 3c status are < 2 for bothc oordinates
+           {
+                if (chk_foreview2(max_wei_inf, pl2o3c_arr[i], pl2o3c_arr[j], true /* fPl*/, fFound)) return true;
+           }
+
+        }
+    }
+    return false;
+}
+
+Gboard::Dist12 Gboard::chk_dist(Coord &ref, Coord &target)
+{
+    int distX =  std::abs(ref.x - target.x);
+    int distY =  std::abs(ref.y - target.y);
+    if (distX > 2 && distY > 2) return Dist12::both_no;
+    if (distX <= 2 && distY <= 2) return Dist12::yes;
+    return Dist12::no;
+
+}
+
+bool Gboard::chk_foreview2(MaxWeightInfo &max_wei_inf, Coord & ref, Coord & target, bool fPl, bool &fFound) //, bool & f3c)
+{
+    int i, j;
+    Player who;
+    if (fPl) who = the_player;  //whom is check now
+
+    else who = the_opponent;
+    StatusCell * status_arr_ref;
+    StatusCell * status_arr_target;
+    bool fFoundRef= false, fFoundTarg= false;
+    bool f3c_local = false;   //local flag 3c
+    bool fFound_local = false;   //local flag 3c
+    if (fPl)
+    {
+        status_arr_ref = board.cell[ref.x][ref.y].pl_stat_arr;  //arrays for of referemce and target cells
+        status_arr_target = board.cell[target.x][target.y].pl_stat_arr;
+    }
+    else
+    {
+        status_arr_ref = board.cell[ref.x][ref.y].op_stat_arr;
+        status_arr_target = board.cell[target.x][target.y].op_stat_arr;
+    }
+    for (i =0; i < 4; i++ )
+    {
+        if (status_arr_ref[i] >= StatusCell::s3c)
+        {
+            if (status_arr_ref[i] == StatusCell::s3c) f3c_local = true; // here is local flag 3c
+            fFoundRef = true;
+            break;
+        }
+    }
+    for (j =0; j < 4; j++ )
+    {
+        if (status_arr_target[j] >= StatusCell::s3c)
+        {
+            if (status_arr_ref[i] == StatusCell::s3c) f3c_local = true; // here is local flag 3c
+            fFoundTarg = true;
+            break;
+        }
+    }
+    assert(fFoundRef && fFoundTarg);    //for debug aims. Status  3c or > must have each cell
+    Coord ref_cop, targ_cop ;   //copy of coordinates
+    ref_cop = ref;
+    targ_cop = target;
+    //ref in corren position. Check target forward and back
+    if (go_near(who, targ_cop, dir_arr[j].x, dir_arr[j].y))
+    {
+        if (write_foreview_info(max_wei_inf, ref_cop, targ_cop, fFound_local, fFound, f3c_local)) return true;       //3c foreview fork was found
+        if (fFound_local)
+        {
+            return false;   //found 2o foreview fork
+        }
+    }
+    targ_cop = target;
+    if (go_near(who, targ_cop, -dir_arr[j].x, -dir_arr[j].y))
+    {
+        if (write_foreview_info(max_wei_inf, ref_cop, targ_cop, fFound_local, fFound, f3c_local)) return true;       //3c foreview fork was found
+        if (fFound_local)
+        {
+            return false;   //found 2o foreview fork
+        }
+    }
+
+    //ref goes forward. Check target in the current position, forward and back
+    targ_cop = target;
+    if (go_near(who, ref_cop, dir_arr[j].x, dir_arr[j].y))
+    {
+        if (write_foreview_info(max_wei_inf, ref_cop, targ_cop, fFound_local, fFound, f3c_local)) return true;       //3c foreview fork was found
+        if (fFound_local)
+        {
+            return false;   //found 2o foreview fork
+        }
+    }
+    if (go_near(who, targ_cop, dir_arr[j].x, dir_arr[j].y)) //taret foeward
+    {
+        if (write_foreview_info(max_wei_inf, ref_cop, targ_cop, fFound_local,  fFound, f3c_local)) return true;       //3c foreview fork was found
+        if (fFound_local)
+        {
+            return false;   //found 2o foreview fork
+        }
+    }
+    targ_cop = target;
+    if (go_near(who, targ_cop, -dir_arr[j].x, -dir_arr[j].y))
+    {
+        if (write_foreview_info(max_wei_inf, ref_cop, targ_cop, fFound_local, fFound, f3c_local)) return true;       //3c foreview fork was found
+        if (fFound_local)
+        {
+            return false;   //found 2o foreview fork
+        }
+    }
+
+    //ref goes forward. Check target in the current position, forward and back
+    ref_cop = ref;
+    targ_cop = target;
+    if (go_near(who, ref_cop, -dir_arr[j].x, -dir_arr[j].y))
+    {
+        if (write_foreview_info(max_wei_inf, ref_cop, targ_cop, fFound_local, fFound, f3c_local)) return true;       //3c foreview fork was found
+        if (fFound_local)
+        {
+            return false;   //found 2o foreview fork
+        }
+    }
+    if (go_near(who, targ_cop, dir_arr[j].x, dir_arr[j].y))
+    {
+        if (write_foreview_info(max_wei_inf, ref_cop, targ_cop, fFound_local, fFound, f3c_local)) return true;       //3c foreview fork was found
+        if (fFound_local)
+        {
+            fFound = true;  //here is located foreview fork
+            return false;   //found 2o foreview fork
+        }
+    }
+    targ_cop = target;
+    if (go_near(who, targ_cop, -dir_arr[j].x, -dir_arr[j].y))
+    {
+        if (write_foreview_info(max_wei_inf, ref_cop, targ_cop, fFound_local, fFound, f3c_local)) return true;       //3c foreview fork was found
+        if (fFound_local)
+        {
+            fFound = true;  //here is located foreview fork
+            return false;   //found 2o foreview fork
+        }
+    }
+
+    return false;
+
+}
+
+
+
+bool Gboard::go_near(Player who, Coord &coord, int dir_x, int dir_y)
+{
+   Player whois;    //whose move is located in the current cell
+   for (int i = 0; i < 3; i++)
+   {
+        coord.x += dir_x;
+        coord.y += dir_y;   //to move in direction
+        if (!(chk_boundaries(coord.x) && chk_boundaries(coord.y))) return false;    //check boundaries
+        {
+            whois = board.cell[coord.x][coord.y].pl;
+            if (whois == Player::None) return true;  //the cell is free
+            if (whois != who) return false; //anothe player - return
+        }
+    }
+   return false;   //return if wasn't find any free cell in this direction
+}
+
+bool Gboard::write_foreview_info(MaxWeightInfo &max_wei_inf, Coord& ref, Coord& targ, bool & fFound_local, bool &fFound, /*bool &f3c,*/ bool f3c_local)
+{
+    if (ref == targ)
+    {
+        if (f3c_local)  // if here is 3c line
+        {
+            //f3c =  true;
+            copy_max_wei(max_wei_inf, ref, board.cell[ref.x][ref.y], (int)WeiCalcFl::f3c_foreview);    //copy information
+            fFound = true;
+            return true;
+        }
+        fFound_local = true;
+        if (fFound) return false;   //already was found foreview fork - don't copy information
+        copy_max_wei(max_wei_inf, ref, board.cell[ref.x][ref.y], (int)WeiCalcFl::f2o_foreview);    //copy information
+        fFound = true;
+    }
+    return false;
+
 }
 
 uint32_t Gboard::getRnd(uint32_t start, uint32_t end)   //get randon number

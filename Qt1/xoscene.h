@@ -1,3 +1,7 @@
+/*
+Created by Sergey Ivanyuk 2022
+GitHub: https://github.com/sivanyuk
+*/
 #ifndef XOSCENE_H
 #define XOSCENE_H
 

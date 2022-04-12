@@ -18,7 +18,7 @@ void ShowTime()
 int main()
 {
 	xop::net::СonnectionInfo conn_info;
-	xo_server server(conn_info.port());
+	xop::xo_server server(conn_info.port());
 	server.Start();
 
 	std::thread thread1 = std::thread(ShowTime);

@@ -73,7 +73,6 @@ namespace xop
 	namespace net
 	{
 
-		// Connection
 		// Forward declare
 		class server_interface;
 
@@ -129,6 +128,26 @@ namespace xop
 			{
 				return id;
 			}
+
+			//set connection's id
+			void SetID(uint32_t id_)
+			{
+				id = id_;
+			}
+
+			// this ID shows the number of the game where the player participates
+			uint32_t GetGameID() const
+			{
+				return id_game;
+			}
+
+			//set connection's id of the game
+			void SetGameID(uint32_t id_)
+			{
+				id_game = id_;
+			}
+
+
 
 		public:
 			void ConnectToClient(xop::net::server_interface* server, uint32_t uid = 0)
@@ -630,7 +649,11 @@ namespace xop
 			bool m_bValidHandshake = false;
 			bool m_bConnectionEstablished = false;
 
-			uint32_t id = 0;
+			uint32_t id = 0;		//id of the clernt
+
+			uint32_t id_game = 0;	//id of client's game	should be cleared after finishing 
+									//game with clerance of game info in the games map
+
 		};
 	}
 }

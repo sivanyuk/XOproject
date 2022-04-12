@@ -6,6 +6,9 @@ GitHub: https://github.com/sivanyuk
 
 #pragma once
 
+//#define DEB_CRYPTO  //for debugging crypto this module
+
+#include "scrc_rand.h"
 #include <net_message.h>
 #include "scrc_common.h"
 #include "scrc_crypto1.h"
@@ -27,8 +30,9 @@ namespace scrc
 		{
             //resize vector
             new_keys.resize(sizeof(crt_init_s));
-
+#ifdef DEB_CRYPTO  //for debugging crypto this module
             std::cout << "Keys preparation\n";
+#endif
 
             //get random information for new keys
             getRandom((uint8_t*)new_keys.data(), sizeof(crt_init_s)); 
@@ -75,14 +79,18 @@ namespace scrc
 
                 if (enchipher_cs(new_keys.data(), new_keys.size()))
                 {
+#ifdef DEB_CRYPTO  //for debugging crypto this module
                     std::cout << "Final Key. Key generation is wrong \n";   //is something went wrong
+#endif
                     return false;
                 }
             crt_init_s* cr_data = (crt_init_s*)new_keys.data();
 
             //copy from the message into the encipher key
             cou_for_encipher = cr_data->client_cou;
+#ifdef DEB_CRYPTO  //for debugging crypto this module
             std::cout << "Final Key. Generation is OK\n";
+#endif
             return true;
         }
 
@@ -92,8 +100,9 @@ namespace scrc
         {
             //check the aray size
             if (new_keys.size() != sizeof(crt_init_s)) return false;
+#ifdef DEB_CRYPTO  //for debugging crypto this module
             std::cout << "Key receive\n";
-
+#endif
             crt_init_s* client_cr_data = (crt_init_s*)(new_keys.data());
 
 
@@ -206,8 +215,9 @@ namespace scrc
         {
             //get the body size
             size_t size = msg.body.size();
+#ifdef DEB_CRYPTO  //for debugging crypto this module
             std::cout << "Message encipher. Size = " << size << std::endl;
-
+#endif
             if (!size) return;   //exit if length of message == 0
             
             //write correct size with the checksum
@@ -241,7 +251,9 @@ namespace scrc
         {
             //get the body size
             size_t size = msg.body.size()  ;
+#ifdef DEB_CRYPTO  //for debugging crypto this module
             std::cout << "Message decipher. Size = " << size << std::endl;
+#endif
             if (!size)
             {
                 //msg.fOK = true;
@@ -275,8 +287,10 @@ namespace scrc
             }
             else
             {
-                std::cout << std::hex << "Counter is OK, Crypto adr = " << this 
+#ifdef DEB_CRYPTO  //for debugging crypto this module
+                std::cout << std::hex << "Counter is OK, Crypto adr = " << this
                     << ". Decipher counter = " << cou_for_decipher << std::noshowbase << std::dec <<  std::endl;
+#endif
             }
 
             //pointer to the data - 

@@ -1,7 +1,15 @@
+/*
+Created by Sergey Ivanyuk 2022
+GitHub: https://github.com/sivanyuk
+*/
+
+
+
 #include "mainwi.h"
 #include "./ui_mainw.h"
 //#include "common_h.h"
 #include <qstring.h>
+#include <QMessageBox>
 
 MainW::MainW(QWidget *parent)
     : QMainWindow(parent)
@@ -29,12 +37,6 @@ MainW::~MainW()
     delete ui;
 }
 
-//void MainW::mouse_curr_pos()
-//{
-//    int x = scene->get_x();
-//    int y = scene->get_y();
-//    ui->label->setText("Mouse move -> x = " + QString::number(x) + ", y = " + QString::number(y));
-//}
 
 void MainW::mouse_pressed()
 {
@@ -150,6 +152,13 @@ void MainW::mouse_pressed()
 
          ui->label_2->setText(str);
     }
+}
+
+void MainW::showErrDialog(char *inf)
+{
+    QMessageBox messageBox;
+    messageBox.critical(this, "Exception", inf);
+    messageBox.setFixedSize(500,200);
 }
 
 void MainW::on_startButton_pressed()

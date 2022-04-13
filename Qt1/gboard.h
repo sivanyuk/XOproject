@@ -1,3 +1,7 @@
+/*
+Created by Sergey Ivanyuk 2022
+GitHub: https://github.com/sivanyuk
+*/
 #ifndef GBOARD_H
 #define GBOARD_H
 
@@ -12,7 +16,13 @@
 #define board_size XOScene::cells   //define Board size parameter
 #endif
 
-
+enum class WeiCalcFl : uint32_t //flags for weight calculation
+{
+    f3c_player = 999,
+    f3c_opponent = 1999,
+    f2o_foreview = 2999,
+    f3c_foreview = 3999,
+};
 
 enum class StatusCell : uint8_t   //uint32_t  //ststus of one cell in one direction
 {
@@ -76,6 +86,7 @@ public:
 
     MaxWeightInfo  find_max_weights();    //find maximum for player and opponent
 
+    static bool chk_boundaries(int pos);    //check boundaries
     const WeightName weight_name[(int)(StatusCell::s4)+1] = {  //table of
         StatusCell::none, "none",
         StatusCell::s1c, "s1c", // 1 closed
@@ -102,10 +113,12 @@ private:
         Cell_info cell[board_size][board_size];		//square board_size
     };
 
-    struct BoardCoord   //board coordinates
+    struct Coord   //board coordinates
     {
-        int x;
-        int y;
+        int8_t x;
+        int8_t y;
+        void operator = (Coord & rhs) {x = rhs.x; y = rhs.y;}   //copy data
+        bool operator == (Coord & rhs) {return x == rhs.x && y == rhs.y;}   //compare elements
     };
 
     struct DirBoard //direction in the board
@@ -116,6 +129,12 @@ private:
     {
         StatusCell status;
         int weight;
+    };
+    enum class Dist12: int //check if distance betwee point 1 or 2
+    {
+        yes = 0,    //distance 1 or 2 for x and y
+        no,     //distance > 2 for one coordinate
+        both_no //distance > 2 for both
     };
 
     static const int val_arr_size = 16;   //size of MaxValue arrays
@@ -151,7 +170,7 @@ private:
     //std::unique_ptr<Board>
     Board board;
 
-    inline bool chk_boundaries(int pos) const;    //check boundaries
+
     StatusCell calc_dir_weight(Player who, int cX, int cY, int dirX, int dirY) const;   //calc weight in one direction
     void calc_weight_arround(Player player, int cX, int cY, StatusCell* status_arr = nullptr);   //calculate weight arround in one way (one direction). Player - the current computer
     inline int find_start_coorinates(int);  //find minmum cell in the board for start search
@@ -165,7 +184,13 @@ private:
      * max_Vsum - maximum value for the
      */
     void find_max_summ(MaxValue & maxVarr, MaxValue * maxV_summ_arr, int & adr_Vsum, int & max_Vsum ); //function for calculation
+
     void copy_max_wei(MaxWeightInfo & maxWinfo, MaxValue & maxV, uint32_t max_sum = 0);   //copy max weight
+
+    void copy_max_wei(MaxWeightInfo &maxWinfo, int posX, int posY, Cell_info * cell_info,  uint32_t max_sum);   //copy max weight variant 2
+
+    void copy_max_wei(MaxWeightInfo &maxWinfo, Coord & coord , Cell_info & cell_info, uint32_t max_sum);
+
     void  gen_rnd_rez(MaxWeightInfo &max_wei_inf,  MaxValue * maxVarr, int arr_lenth, uint32_t max_sum = 0);  //get a random number if there are few results with the same weight
 
     /*
@@ -185,7 +210,43 @@ private:
     * f Player  true for player, false for opponent
     * fChk_both: if both -to check situation for 2o and 2c, false check only 3c
     */
-    bool check_2o3c(MaxValue & maxVal, bool fPlayer, bool fChk_both = false);   //check if pressents 3 close situation
+    bool check_2o3c(int x, int y, bool fPlayer, bool fChk_both = false);   //check if pressents 3 close situation
+
+    /*
+     * check situation when both players have 2*2o/3c configuration
+     * if player or/and oppenent have 3o - situatio - fill max_wei_inf with result= true
+     */
+    bool find_both_3c(MaxWeightInfo &max_wei_inf, int startX, int startY, int endX, int endY);    //ckeck if both players have situation 2* 2o/3c situation
+
+    /*
+     * check winning fork in the move after current one
+     * max_wei_inf - cordinates if situation will be found with result == true
+     */
+    bool check_foreview(MaxWeightInfo &max_wei_inf, int startX, int startY, int endX, int endY);    //check situation if wining can be in apear in a move after next  one
+
+    Dist12 chk_dist (Coord & ref, Coord & target); //compatre for distance 1 or 2 for x and y between 2 points
+
+    /*
+     * check winning for 3 cell with 2o or 3c each
+     * max_wei_inf - cordinates if situation will be found with result == true
+     *  ref, target - ccordinates of 2 cells
+     *  f3c - flag if cell with 3 point will be found
+     *  fPl flage true for player, false - opponent
+     *  result: true if found foreview fork with 3c
+     */
+    bool chk_foreview2(MaxWeightInfo &max_wei_inf, Coord & ref, Coord & target, bool fPl, bool &fFound); //,  bool & f3c);
+
+
+    /*
+     * find a free cell when move in the certain direction
+     */
+    bool go_near(Player who, Coord & coord, int dir_x, int dir_y);
+
+    /*
+     * wirte information if found foreview fork
+     * result = true if here is foreview for with 3c line if it's
+    */
+    bool write_foreview_info(MaxWeightInfo &max_wei_inf, Coord& ref, Coord& targ, bool & fFound_local, bool &fFound, /*bool &f3c, */ bool f3c_local);
 };
 
 #endif // GBOARD_H
